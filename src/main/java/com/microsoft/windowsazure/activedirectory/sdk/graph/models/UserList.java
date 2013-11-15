@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import org.json.JSONArray;
 
-import com.google.gson.Gson;
 import com.microsoft.windowsazure.activedirectory.sdk.graph.exceptions.SdkException;
 import com.microsoft.windowsazure.activedirectory.sdk.graph.helper.JSONHelper;
 
@@ -31,11 +30,8 @@ public class UserList extends DirectoryObjectList<User> {
 			try {
 				JSONHelper.convertJSONObjectToDirectoryObject(array.optJSONObject(i), user);
 			} catch (SdkException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			//user = new Gson().fromJson(array.optString(i), User.class);
-			//	logger.info("user ->" + user);
 			directoryObjectList.add(user);
 		}
 	}

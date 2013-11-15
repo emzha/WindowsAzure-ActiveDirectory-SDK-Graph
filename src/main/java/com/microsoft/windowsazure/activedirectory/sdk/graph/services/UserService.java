@@ -6,7 +6,6 @@ package com.microsoft.windowsazure.activedirectory.sdk.graph.services;
 import java.io.IOException;
 
 import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -30,11 +29,20 @@ public class UserService {
 //	private static final TenantConfiguration TENANTCONFIG = TenantConfiguration.getInstance();
 	private TenantConfiguration tenant;
 	private RestClient restClient; 
+	private String accessToken;
+	
 	public UserService(TenantConfiguration tenant){
 		this.tenant = tenant;
 		restClient = new RestClient(SdkConfig.PROTOCOL_NAME, 
 				 SdkConfig.restServiceHost,
 				 this.tenant.getTenantContextId());
+		accessToken = tenant.getAccessToken();
+	}
+
+	public UserService(String accessToken, String tenantContextId){
+		this.accessToken = accessToken;
+		restClient = new RestClient(SdkConfig.PROTOCOL_NAME, 
+				 SdkConfig.restServiceHost,tenantContextId);
 	}
 	
 	private static Logger logger;
@@ -60,7 +68,7 @@ public class UserService {
 	
 	public RoleList getRolesForUser(String objectId)  throws SdkException {
 		String paramStr = String.format("/%s/memberOf", objectId);
-;		JSONObject response = this.restClient.GET("/users" + paramStr, null, null, this.tenant.getAccessToken());
+;		JSONObject response = this.restClient.GET("/users" + paramStr, null, null, accessToken);
 
 		JSONArray memberArray = JSONHelper.fetchDirectoryObjectJSONArray(response);
 
@@ -90,9 +98,6 @@ public class UserService {
 	public UserList queryUsers(String attributeName, 
 									  String opName, 
 									  String searchString) throws SdkException {
-
-		// This object would hold all the user information. 
-		UserList thisPage = new UserList();
 		
 		if( attributeName.trim().isEmpty() 
 			|| opName.trim().isEmpty() 
@@ -116,12 +121,18 @@ public class UserService {
 			// If this is an general query.
 			paramString = String.format("$filter=%s %s '%s'", attributeName, opName, searchString);
 		}
+		return this.queryAllUsers(paramString);
+	}
+	
+	public UserList queryAllUsers(String paramString) throws SdkException {
 
+		// This object would hold all the user information. 
+		UserList thisPage = new UserList();
 		
 		// Send the query with the built queryOption.
 		JSONObject response = new JSONObject();
 		
-		response = this.restClient.GET("/users", paramString, null, this.tenant.getAccessToken());
+		response = this.restClient.GET("/users", paramString, null, accessToken);
 		logger.info("response -> " + response);
 		JSONArray users = new JSONArray();
 	
@@ -147,7 +158,7 @@ public class UserService {
 		
 		String paramString = String.format("/%s/", upn);
 
-		JSONObject response = this.restClient.GET("/users" + paramString, null, null, this.tenant.getAccessToken());
+		JSONObject response = this.restClient.GET("/users" + paramString, null, null, accessToken);
 		logger.info("getobjectid from upn response ->" + response);
 		JSONObject directoryObjectJSON = response.optJSONObject("responseMsg");
 		
@@ -162,7 +173,7 @@ public class UserService {
 	public UserList getDirectReportsByObjectId(String objectId) throws SdkException {
 		
 		String paramStr = String.format("/%s/directReports", objectId);
-		JSONObject response = this.restClient.GET("/users" + paramStr, null, null, this.tenant.getAccessToken());
+		JSONObject response = this.restClient.GET("/users" + paramStr, null, null, accessToken);
 		logger.info("response ->" + response);
 		JSONArray usersJSONArray = JSONHelper.fetchDirectoryObjectJSONArray(response);
 		
@@ -188,7 +199,7 @@ public class UserService {
 	public User getManagerByObjectId(String objectId) throws SdkException {
 		
 		String paramStr = String.format("/%s/manager", objectId);
-		JSONObject response = restClient.GET("/users" + paramStr, null, null, this.tenant.getAccessToken());
+		JSONObject response = restClient.GET("/users" + paramStr, null, null, accessToken);
 		logger.info("response ->" + response);
 		JSONObject userJSONObject = JSONHelper.fetchDirectoryObjectJSONObject(response);
 		

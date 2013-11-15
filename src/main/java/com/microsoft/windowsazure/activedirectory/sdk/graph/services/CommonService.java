@@ -1,7 +1,6 @@
 package com.microsoft.windowsazure.activedirectory.sdk.graph.services;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -90,12 +89,7 @@ public class CommonService {
 
 				return thisList;	
 			}
-		} catch (InstantiationException | IllegalAccessException
-				| IllegalArgumentException | InvocationTargetException e) {
-			e.printStackTrace();
-		} catch (NoSuchMethodException e) {
-			e.printStackTrace();
-		} catch (SecurityException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return thisList;	
@@ -119,7 +113,7 @@ public class CommonService {
 		S destDirectoryObject = null;
 		try {
 			destDirectoryObject = elementType.newInstance();
-		} catch (InstantiationException | IllegalAccessException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		JSONHelper.convertJSONObjectToDirectoryObject(directoryObjectJSON, destDirectoryObject);
